@@ -332,8 +332,15 @@
 </footer>
 
 <script>
-const API_URL = "http://127.0.0.1:8022/api/britagem";
+// Mesma origem (aberto via http://127.0.0.1:8022) -> API relativa, sem bloqueio.
+// Origem pública (GitHub Pages) -> tenta a API local; navegadores bloqueiam
+// acesso público->loopback, então cai no modo amostra.
+const HOST_LOCAL = location.hostname === "127.0.0.1" || location.hostname === "localhost";
+const API_URL = HOST_LOCAL ? "/api/britagem" : "http://127.0.0.1:8022/api/britagem";
 const REFRESH_MIN = 10; // auto-refresh em minutos
+const MSG_OFFLINE = HOST_LOCAL
+  ? "API local offline — rode o atalho Britagem ERO no Desktop"
+  : "Modo amostra — abra http://127.0.0.1:8022 na máquina da planta para dados vivos";
 
 // Dados de amostra (julho 2026) — usados quando a API local está offline
 const DADOS_AMOSTRA = {
@@ -448,7 +455,7 @@ async function carregar() {
     setStatus("on", `Conectado ao PI · atualizado ${d.gerado_em}`);
   } catch (e) {
     render(DADOS_AMOSTRA);
-    setStatus("off", "Modo amostra — API local offline (rode o atalho Britagem ERO no Desktop)");
+    setStatus("off", MSG_OFFLINE);
   } finally {
     btn.disabled = false;
   }
